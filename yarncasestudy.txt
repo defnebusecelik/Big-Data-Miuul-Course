@@ -1,0 +1,18 @@
+#servis calistirma
+start-all.sh
+
+#veri seti
+wget https://github.com/erkansirin78/datasets/raw/master/turkish_cities_wc.zip
+unzip turkish_cities_wc.zip
+
+#klasor olusturma
+hdfs dfs -mkdir /user/train/datasets/turkish_cities_input
+
+#HDFS yukle
+hdfs dfs -put turkish_cities_wc.txt /user/train/datasets/turkish_cities_input
+
+#YARN
+yarn jar mapreduce.wordcount.jar com.veribilimiokulu.mapreduce.MR2WordCount /user/train/datasets/turkish_cities_input /user/train/data
+
+#HDFS output
+hdfs dfs -cat /user/train/datasets/turkish_cities_output/part-r-00000
