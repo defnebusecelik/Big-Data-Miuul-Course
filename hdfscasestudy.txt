@@ -1,0 +1,20 @@
+#servis çalıştırma
+start-all.sh
+
+#wine.csv dosyasını aktarma
+wget -P ~/datasets/ https://raw.githubusercontent.com/erkansirin78/datasets/master/Wine.csv
+
+#klasor olusturma
+hdfs dfs -mkdir /user/train/hdfs_odev
+
+#veri setini HDFS'e kopyalama
+hdfs dfs -put ~/datasets/Wine.csv /user/train/hdfs_odev
+
+#kopyalama
+hdfs dfs -cp /user/train/hdfs_odev /tmp/
+
+#silme
+hdfs dfs -rm -r -skipTrash /tmp/hdfs_odev
+
+#HDFS web arayüzü
+http://localhost:9870/explorer.html#/user/train/hdfs_odev
