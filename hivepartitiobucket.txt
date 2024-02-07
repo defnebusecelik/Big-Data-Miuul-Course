@@ -1,0 +1,91 @@
+SORU 1 - Github repoda bulunan u.data ve u.item veri setlerini Hive’a tablo olarak yükleyiniz.
+
+#veri setleri
+wget -P ~/datasets/ https://raw.githubusercontent.com/erkansirin78/datasets/master/ml-100k/u.data
+
+wget -P ~/datasets/ https://raw.githubusercontent.com/erkansirin78/datasets/master/ml-100k/u.item
+
+#beeline
+beeline -u jdbc:hive2://localhost:10000
+CREATE DATABASE movielens;
+
+#ratings tablosu
+create table if not exists movielens.ratings (
+user_id int, item_id int, rating int, rating_time bigint)
+row format delimited
+fields terminated by '\t'
+lines terminated by '\n'
+stored as textfile
+tblproperties('skip.header.line.count'='1');
+
+#veri yükleme
+load data local inpath '/home/train/datasets/u.data' into table movielens.ratings;
+
+#movies tablosu
+create table if not exists movielens.movies (
+movieid int, movietitle string, releasedate string, videoreleasedate string, IMDbURL string, unknown tinyint, Action tinyint, Adventure tinyint, Animation tinyint, Childrens tinyint, Comedy tinyint, Crime tinyint, Documentary tinyint, Drama tinyint, Fantasy tinyint, FilmNoir tinyint, Horror tinyint, Musical tinyint, Mystery tinyint, Romance tinyint, SciFi tinyint, Thriller tinyint, War tinyint, Western tinyint)
+row format delimited
+fields terminated by '|'
+lines terminated by '\n'
+stored as textfile
+tblproperties('skip.header.line.count'='1');
+
+#veri yükleme
+load data local inpath '/home/train/datasets/u.item' into table movielens.movies;
+
+
+SORU 2 - Hive üzerinde gerekli veri organizasyonunu yapınız.
+
+# Aylık olarak en popüler (en çok oylanan, en yüksek ortalama puanı alan) filmler
+
+#partition ve bucketing tablo
+create table if not exists movielens.movie_ratings (
+user_id int, rating int, rating_time bigint, movieid int, movietitle string, videoreleasedate string, imdburl string)
+partitioned by (review_year int, review_month int)
+clustered by (movietitle) into 4 buckets
+stored as orc;
+
+#ayarlar
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+set hive.enforce.bucketing=true;
+
+#veri yükleme
+insert overwrite table movielens.movie_ratings PARTITION(review_year, review_month)
+select user_id, rating, rating_time, movieid, movietitle, videoreleasedate, imdburl,
+YEAR(from_unixtime(rating_time, 'yyyy-MM-dd')) as review_year,
+MONTH(from_unixtime(rating_time, 'yyyy-MM-dd')) as review_month
+from movielens.ratings r join movielens.movies m on r.item_id = m.movieid;
+
+#gözlem sayısı
+select count(1) from movielens.movie_ratings;
+#partition
+show partitions movielens.movie_ratings;
+#tablo özellikleri
+describe movielens.movie_ratings;
+#unique değer
+select distinct (review_year, review_month) from movielens.movie_ratings;
+
+
+SORU 3 -  İstenen analizler için gerekli sorguları oluşturup yorumlayınız.
+
+#1998 Nisan en çok puanlanan
+select count(*) total_count, movietitle
+from movielens.movie_ratings
+where review_year=1998 AND review_month=4
+group by movietitle order by total_count desc limit 20;
+
+#1998 Nisan puan yüksekliği
+select avg(rating) as avg_rating, count(*) total_count, movietitle
+from movielens.movie_ratings
+where review_year=1998 AND review_month=4
+group by movietitle order by avg_rating desc limit 20;
+
+
+
+
+
+
+
+
+
