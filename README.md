@@ -8,3 +8,5 @@
 
 ### 2- Apache Hive: Büyük Veri Ambarı
 
+• [Apache Hive ile Tablo İşlemleri ve Veri Manipülasyonu](https://github.com/defnebusecelik/Big-Data-Miuul-Course/blob/main/apachehivetabloislemleri.txt)
+
