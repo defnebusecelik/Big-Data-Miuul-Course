@@ -1,0 +1,65 @@
+SORU 1 - Sorgu performansını önceleyecek şekilde bir tablo oluşturunuz.
+
+#beeline
+beeline -u jdbc:hive2://localhost:10000
+
+#tablo oluşturma
+create table if not exists test1.flo_transactions
+(master_id string, order_channel string, platform_type string, last_order_channel string, first_order_date string, last_order_date string, last_order_date_online string, last_order_date_offline string, order_num_total_ever_online int, order_num_total_ever_offline int, customer_value_total_ever_offline float, customer_value_total_ever_online float, interested_in_categories_12 array<string>, online_product_group_amount_top_name_12 string, offline_product_group_name_12 string, last_order_date_new date, store_type string )
+row format delimited
+fields terminated by '|'
+lines terminated by '\n'
+stored as textfile
+tblproperties('skip.header.line.count'='1');
+
+#veri yükleme
+LOAD DATA INPATH "/user/train/flo_odev/flo100k.csv" into table test1.flo_transactions;
+
+#ORC tablo oluşturma
+create table test1.flo_transactions_orc_table stored as orc
+as select
+master_id, order_channel, platform_type, last_order_channel,
+cast(concat(substr(first_order_date, 1,10), ' ',
+substr(first_order_date,12,8)) as timestamp) first_order_date,
+cast(concat(substr(last_order_date, 1,10), ' ',
+substr(last_order_date,12,8)) as timestamp) last_order_date,
+cast(concat(substr(last_order_date_online, 1,10), ' ',
+substr(last_order_date_online,12,8)) as timestamp) last_order_date_online,
+cast(concat(substr(last_order_date_offline, 1,10), ' ',
+substr(last_order_date_offline,12,8)) as timestamp) last_order_date_offline,
+order_num_total_ever_online, order_num_total_ever_offline, customer_value_total_ever_offline, customer_value_total_ever_online, interested_in_categories_12, online_product_group_amount_top_name_12, offline_product_group_name_12, last_order_date_new, store_type
+from test1.flo_transactions ;
+
+
+#Mağaza türlerine (store_type) göre işlem sayılarını bulan sorgu
+SELECT store_type, COUNT(1) as total_count
+FROM test1.flo_transactions_orc_table
+GROUP BY store_type
+ORDER BY total_count DESC;
+
+#Sipariş kanallarına (order_channel) göre işlem sayılarını bulan sorgu
+SELECT order_channel, COUNT(1) as total_count
+FROM test1.flo_transactions_orc_table
+GROUP BY order_channel
+ORDER BY total_count DESC;
+
+#İlk sipariş yılı (first_order_year) baz alınarak yıllara göre işlem sayılarını bulan sorgu
+SELECT YEAR (first_order_date) AS first_order_year, COUNT(1) as total_count
+FROM test1.flo_transactions_orc_table
+GROUP BY 1
+ORDER BY total_count DESC;
+
+set hive.groupby.orderby.position.alias=true;
+
+#Omni-channel satışlarında en çok değer getiren 15 müşteriyi bulan sorgu
+SELECT master_id, customer_value_total_ever_offline,
+customer_value_total_ever_online,
+(customer_value_total_ever_offline + customer_value_total_ever_online) as
+customer_value
+FROM test1.flo_transactions_orc_table
+WHERE customer_value_total_ever_offline > 0.0 AND
+customer_value_total_ever_online > 0.0
+ORDER BY customer_value DESC
+LIMIT 15
+
+
