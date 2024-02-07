@@ -1,0 +1,41 @@
+SORU 1 - Wine.csv dosyasını hive_odev veri tabanına wine adında bir
+tablo olarak kaydediniz.
+
+
+#veri seti indirme wine.csv
+wget -P datasets/ https://raw.githubusercontent.com/erkansirin78/datasets/master/Wine.csv
+
+#veri setini HDFSe aktarma
+hdfs dfs -put ~/datasets/Wine.csv /user/train/datasets
+
+#beeline
+beeline -u jdbc:hive2://localhost:10000
+
+#veritabanı
+create database hive_odev;
+use hive_odev;
+
+#şema
+create table if not exists hive_odev.wine(
+Alcohol int, tv float, Ash float, Ash_Alcanity float, Magnesium float, Total_Phenols float, Flavanoids float, Nonflavanoid_Phenols float, Proanthocyanins float, Color_Intensity float, Hue float, OD280 float, Proline float, Customer_Segment int)
+row format delimited
+fields terminated by ','
+lines terminated by '\n'
+stored as textfile
+tblproperties('skip.header.line.count'='1');
+
+#tablo
+load data inpath '/user/train/hdfs_odev/Wine.csv' into table wine;
+
+
+SORU 2 - wine tablosundaki Alcohol oranı 13.00’ten büyük kayıtları wine_alc_gt_13 adında yeni bir tabloya yazınız.
+
+#tablo
+CREATE TABLE hive_odev.wine_alc_gt_13 as
+SELECT * FROM hive_odev.wine
+WHERE alcohol > 13.00;
+
+SORU 3 - hive_odev veri tabanını ve içindeki tabloları tek komutla siliniz.
+
+#silme
+drop database hive_odev cascade;
