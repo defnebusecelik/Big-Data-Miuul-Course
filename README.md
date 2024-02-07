@@ -10,3 +10,4 @@
 
 • [Apache Hive ile Tablo İşlemleri ve Veri Manipülasyonu](https://github.com/defnebusecelik/Big-Data-Miuul-Course/blob/main/apachehivetabloislemleri.txt)
 
+• [Apache Hive Partition ve Bucketing](https://github.com/defnebusecelik/Big-Data-Miuul-Course/blob/main/apachehivetabloislemleri.txt)
