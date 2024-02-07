@@ -6,3 +6,5 @@
 
 • [YARN Case Study](https://github.com/defnebusecelik/Big-Data-Miuul-Course/blob/main/yarncasestudy.txt)
 
+### 2- Apache Hive: Büyük Veri Ambarı
+
