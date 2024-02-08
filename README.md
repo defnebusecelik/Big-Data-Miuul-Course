@@ -14,3 +14,4 @@
 
 • [Apache Hive ile FLO Veri Analizi](https://github.com/defnebusecelik/Big-Data-Miuul-Course/blob/main/flo.txt)
 
+### 3- Apache Sqoop
