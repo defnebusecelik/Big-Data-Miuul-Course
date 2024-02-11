@@ -1,0 +1,36 @@
+#atscale topic
+kafka-topics.sh --bootstrap-server localhost:9092 --create --topic atscale --partitions 2 --replication-factor 1
+
+#listeleme
+kafka-topics.sh --bootstrap-server localhost:9092 --list
+
+#topic özellikleri
+kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic atscale
+
+# churn topic
+kafka-topics.sh --bootstrap-server localhost:9092 --create --topic churn --partitions 3 --replication-factor 1
+
+#consumer
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic churn --group churn_group
+
+#produce
+python dataframe_to_kafka.py -i ~/datasets/Churn_Modelling.csv -t churn -k 1
+
+#topic silme
+kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic atscale,churn
+
+#python kafka consumer
+from kafka import KafkaConsumer
+consumer = KafkaConsumer('test1',group_id='group1',bootstrap_servers=['localhost:9092'])
+for message in consumer:
+print("Key: {}, Value: {}, Partition: {}, TS: {} ".format(message.key.decode(), message.value.decode(), message.partition, message.timestamp))
+
+#python kafka producer
+from kafka import KafkaProducer
+producer = KafkaProducer(bootstrap_servers=['localhost:9092'])
+producer.send("test1", key="1".encode(), value="Marmara".encode())
+producer.send("test1", key="2".encode(), value="Ege".encode())
+producer.send("test1", key="3".encode(), value="Akdeniz".encode())
+producer.send("test1", key="4".encode(), value="İç Anadolu".encode())
+
+
