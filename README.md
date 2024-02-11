@@ -19,3 +19,6 @@
 • [Apache Sqoop ile Veri Transferi](https://github.com/defnebusecelik/Big-Data-Miuul-Course/blob/main/sqoop.txt)
 
 ### 4- Apache Kafka
+
+• [Apache Kafka ile Veri İşleme](https://github.com/defnebusecelik/Big-Data-Miuul-Course/blob/main/kafka.txt)
+
